@@ -1,0 +1,114 @@
+extends layout
+
+block content
+  .product-detail-section
+    // Breadcrumb
+    .breadcrumb
+      a(href='/') Home
+      span / 
+      a(href=`/products?category=${product.category.slug}`)= product.category.name
+      span / 
+      span= product.name
+
+    .product-detail-grid
+      // Product Gallery
+      .product-gallery
+        .main-image
+          img#mainImage(src=product.thumbnail alt=product.name)
+
+        .thumbnail-images
+          img(src=product.thumbnail alt=product.name onclick="changeMainImage(this.src)")
+          each image in product.images
+            img(src=image alt=product.name onclick=`changeMainImage('${image}')`)
+
+      // Product Details
+      .product-details
+        h1= product.name
+
+        // Rating
+        .rating-section
+          .stars
+            each i in [1,2,3,4,5]
+              if i <= Math.round(product.rating)
+                i.fas.fa-star.filled
+              else
+                i.fas.fa-star
+          span= product.rating.toFixed(1)
+          span (#{product.totalReviews} reviews)
+
+        // Price
+        .price-section
+          if product.discountPrice
+            h2.price
+              span.original $#{product.price.toFixed(2)}
+              span.discount $#{product.discountPrice.toFixed(2)}
+            .discount-info
+              i.fas.fa-tag
+              | SAVE #{Math.round(((product.price - product.discountPrice)/product.price) * 100)}%
+          else
+            h2.price= '$' + product.price.toFixed(2)
+
+        // Stock Status
+        .stock-info
+          if product.stock > 0
+            .in-stock
+              i.fas.fa-check-circle
+              | #{product.stock} in stock
+          else
+            .out-of-stock
+              i.fas.fa-ban
+              | Out of Stock
+
+        // Description
+        .product-description
+          h3 Description
+          p= product.description
+
+        // Add to Cart
+        .add-to-cart-section
+          .quantity-selector
+            button(onclick='decreaseQty()') i.fas.fa-minus
+            input#quantity(type='number' value='1' min='1' max=product.stock)
+            button(onclick='increaseQty()') i.fas.fa-plus
+
+          button.btn.btn-primary.btn-lg(onclick=`addToCart('${product._id}')` disabled=product.stock===0)
+            i.fas.fa-shopping-cart
+            | Add to Cart
+
+          button.btn.btn-outline.btn-lg(onclick='addToWishlist()')
+            i.fas.fa-heart
+            | Wishlist
+
+    // Related Products
+    if relatedProducts && relatedProducts.length
+      .related-products
+        h3 Related Products
+        .products-grid
+          each relProduct in relatedProducts
+            .product-card
+              .product-image
+                img(src=relProduct.thumbnail alt=relProduct.name)
+              .product-info
+                h4
+                  a(href=`/products/${relProduct.slug}`)= relProduct.name
+                .price-section
+                  if relProduct.discountPrice
+                    span.original-price $#{relProduct.price}
+                    span.discount-price $#{relProduct.discountPrice}
+                  else
+                    span $#{relProduct.price}
+                .product-actions
+                  button.btn.btn-primary.btn-sm(onclick=`addToCart('${relProduct._id}')`) Add
+                  a.btn.btn-outline.btn-sm(href=`/products/${relProduct.slug}`) View
+
+block scripts
+  script.
+    function changeMainImage(src) { document.getElementById('mainImage').src = src; }
+    function increaseQty() { const q=document.getElementById('quantity'); if(q.value<#{product.stock}) q.value=parseInt(q.value)+1; }
+    function decreaseQty() { const q=document.getElementById('quantity'); if(q.value>1) q.value=parseInt(q.value)-1; }
+    function addToCart(productId) {
+      const quantity=parseInt(document.getElementById('quantity').value)||1;
+      fetch('/api/cart/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId,quantity})})
+        .then(res=>res.json()).then(data=>{if(data.success){alert('Added to cart');location.reload()}else{alert(data.message)}})
+    }
+    function addToWishlist(){alert('Added to wishlist')}

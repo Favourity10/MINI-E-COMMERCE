@@ -1,0 +1,83 @@
+extends layout
+
+block content
+  .orders-section
+    h1
+      i.fas.fa-file-invoice
+      | My Orders
+
+    if orders && orders.length > 0
+      .orders-list
+        each order in orders
+          .order-card
+            .order-header
+              .order-info
+                h3
+                  i.fas.fa-barcode
+                  = order.orderNumber
+                p
+                  i.fas.fa-calendar
+                  = new Date(order.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })
+
+              .order-status(class=`status-${order.orderStatus}`)
+                i.fas.fa-info-circle
+                span= order.orderStatus.toUpperCase()
+
+            .order-items
+              each item in order.items
+                .order-item
+                  img(src=item.product.thumbnail alt=item.product.name)
+                  div
+                    h4= item.product.name
+                    p
+                      | Qty: #{item.quantity}
+                      br
+                      | $#{item.price.toFixed(2)} each
+                  span.item-total= '$' + (item.price * item.quantity).toFixed(2)
+
+            .order-footer
+              .order-total
+                strong Total Amount:
+                span= '$' + order.totalAmount.toFixed(2)
+
+              a.btn.btn-sm(href=`/orders/${order._id}`)
+                i.fas.fa-eye
+                | View Details
+
+              if order.orderStatus !== 'delivered' && order.orderStatus !== 'cancelled'
+                button.btn.btn-sm.btn-danger(onclick=`cancelOrder('${order._id}')`)
+                  i.fas.fa-times-circle
+                  | Cancel Order
+
+    else
+      // No Orders
+      .empty-orders
+        i.fas.fa-inbox
+        h2 No orders yet
+        p Start shopping to place your first order!
+        a.btn.btn-primary(href='/products')
+          i.fas.fa-shopping-bag
+          | Shop Now
+
+block scripts
+  script.
+    function cancelOrder(orderId) {
+      if (!confirm('Are you sure you want to cancel this order?')) return;
+
+      fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.message);
+        }
+      });
+    }

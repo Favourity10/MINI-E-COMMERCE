@@ -1,0 +1,179 @@
+extends layout
+
+block content
+  .cart-section
+    h1
+      i.fas.fa-shopping-cart
+      | Shopping Cart
+
+    if cart && cart.items && cart.items.length > 0
+      .cart-container
+        // Cart Items
+        .cart-items
+          table.cart-table
+            thead
+              tr
+                th Product
+                th Price
+                th Quantity
+                th Subtotal
+                th Action
+
+            tbody
+              each item in cart.items
+                tr
+                  td.product-cell
+                    img(src=item.product.thumbnail alt=item.product.name)
+                    div
+                      h4
+                        a(href=`/products/${item.product.slug}`)= item.product.name
+                      p= item.product.category.name
+
+                  td
+                    span $#{item.price.toFixed(2)}
+
+                  td
+                    input(
+                      type='number'
+                      value=item.quantity
+                      min='1'
+                      max=item.product.stock
+                      onchange=`updateQuantity('${item.product._id}', this.value)`
+                    )
+
+                  td
+                    strong $#{(item.price * item.quantity).toFixed(2)}
+
+                  td
+                    button.btn-remove(
+                      onclick=`removeFromCart('${item.product._id}')`
+                      title='Remove from cart'
+                    )
+                      i.fas.fa-trash-alt
+
+        // Cart Summary
+        .cart-summary
+          .summary-box
+            h3
+              i.fas.fa-receipt
+              | Order Summary
+
+            .summary-row
+              span Subtotal
+              span= '$' + cart.totalAmount.toFixed(2)
+
+            .summary-row
+              span Shipping
+              span
+                | FREE
+                if cart.totalAmount < 100
+                  br
+                  small (Free over $100)
+
+            .summary-row
+              span Discount
+              if cart.totalDiscount && cart.totalDiscount > 0
+                span.discount= '-$' + cart.totalDiscount.toFixed(2)
+              else
+                span $0.00
+
+            .summary-row.total
+              strong Total
+              strong= '$' + cart.totalAmount.toFixed(2)
+
+            button.btn.btn-primary.btn-block(onclick="proceedToCheckout()")
+              i.fas.fa-credit-card
+              | Proceed to Checkout
+
+            a.btn.btn-outline.btn-block(href='/products')
+              i.fas.fa-shopping-bag
+              | Continue Shopping
+
+            .coupon-section
+              h4 Have a coupon?
+              form(onsubmit='applyCoupon(event)')
+                .coupon-input
+                  input(
+                    type='text'
+                    placeholder='Enter coupon code'
+                    id='couponCode'
+                  )
+                  button.btn.btn-sm(type='submit')
+                    i.fas.fa-check
+                    | Apply
+
+    else
+      // Empty Cart
+      .empty-cart
+        i.fas.fa-shopping-cart
+        h2 Your cart is empty
+        p Start shopping and add some amazing items to your cart!
+        a.btn.btn-primary(href='/products')
+          i.fas.fa-shopping-bag
+          | Start Shopping
+
+block scripts
+  script.
+    function updateQuantity(productId, qty) {
+      qty = parseInt(qty);
+      if (qty < 1) return;
+
+      fetch('/api/cart/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity: qty })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.message);
+        }
+      });
+    }
+
+    function removeFromCart(productId) {
+      if (!confirm('Remove this item from cart?')) return;
+
+      fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.message);
+        }
+      });
+    }
+
+    function proceedToCheckout() {
+      window.location = '/checkout';
+    }
+
+    function applyCoupon(event) {
+      event.preventDefault();
+      const code = document.getElementById('couponCode').value;
+      if (!code) {
+        alert('Please enter a coupon code');
+        return;
+      }
+
+      fetch('/api/coupon/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.message);
+        }
+      });
+    }

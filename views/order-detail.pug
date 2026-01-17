@@ -1,0 +1,74 @@
+extends layout
+
+block content
+  .order-detail-section
+    a.back-link(href='/orders')
+      i.fas.fa-arrow-left
+      | Back to Orders
+
+    .order-detail-container
+      // Order Header
+      .order-detail-header
+        .order-number
+          h1
+            i.fas.fa-receipt
+            = order.orderNumber
+          p
+            strong Date:
+            = new Date(order.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
+
+        .order-status(class=`status-${order.orderStatus}`)
+          i.fas.fa-info-circle
+          h2= order.orderStatus.toUpperCase()
+
+      // Order Timeline
+      if order.orderStatus !== 'cancelled'
+        .order-timeline
+          - const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
+          - const currentIndex = statuses.indexOf(order.orderStatus)
+          
+          each status, index in statuses
+            .timeline-item(class=index <= currentIndex ? 'completed' : '')
+              .timeline-icon
+                i(class=`fas fa-${// filepath: c:\Users\USER\Project\Mini-Ecommerce\views\order-detail.pug
+extends layout
+
+block content
+  .order-detail-section
+    a.back-link(href='/orders')
+      i.fas.fa-arrow-left
+      | Back to Orders
+
+    .order-detail-container
+      // Order Header
+      .order-detail-header
+        .order-number
+          h1
+            i.fas.fa-receipt
+            = order.orderNumber
+          p
+            strong Date:
+            = new Date(order.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
+
+        .order-status(class=`status-${order.orderStatus}`)
+          i.fas.fa-info-circle
+          h2= order.orderStatus.toUpperCase()
+
+      // Order Timeline
+      if order.orderStatus !== 'cancelled'
+        .order-timeline
+          - const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
+          - const currentIndex = statuses.indexOf(order.orderStatus)
+          
+          each status, index in statuses
+            .timeline-item(class=index <= currentIndex ? 'completed' : '')
+              .timeline-icon
+                i(class=`fas fa-${

@@ -1,0 +1,86 @@
+extends layout
+
+block content
+  .products-section
+    // Sidebar Filters
+    aside.sidebar
+      .filter-box
+        h3 Filters
+
+        // Categories Filter
+        .filter-group
+          h4 Categories
+          ul
+            each cat in categories
+              li
+                label
+                  input(type='checkbox', class='category-filter', value=cat.slug, checked=filters.category && filters.category.split(',').includes(cat.slug) ? true : false)
+                  | #{cat.name}
+
+        // Price Filter
+        .filter-group
+          h4 Price Range
+          .price-inputs
+            input.price-input(type='number', placeholder='Min', value=filters.minPrice || '')
+            span -
+            input.price-input(type='number', placeholder='Max', value=filters.maxPrice || '')
+          button.btn.btn-sm.btn-primary.mt-2(type='button', onclick='applyFilters()') Apply Filters
+
+        // Sort Filter
+        .filter-group
+          h4 Sort By
+          select.form-select.form-select-sm(onchange='applySort(this.value)')
+            option(value='-createdAt', selected=filters.sortBy=='-createdAt') Newest
+            option(value='price', selected=filters.sortBy=='price') Price: Low to High
+            option(value='-price', selected=filters.sortBy=='-price') Price: High to Low
+            option(value='-rating', selected=filters.sortBy=='-rating') Top Rated
+            option(value='-soldCount', selected=filters.sortBy=='-soldCount') Most Popular
+
+        // Brands Filter
+        .filter-group
+          h4 Brands
+          ul
+            each brand in ['Samsung','Sony','Apple','LG','Nike','Adidas']
+              li
+                label
+                  input(type='checkbox', class='brand-filter', value=brand, checked=filters.brand && filters.brand.split(',').includes(brand) ? true : false)
+                  | #{brand}
+
+        button.btn.btn-outline-primary.w-100.mt-3(type='button', onclick='resetFilters()') Reset Filters
+
+    // Main Content
+    .products-main
+      .products-header.mb-4
+        h1.fw-bold
+          i.fas.fa-shopping-bag.me-2
+          | Our Products
+        p.text-muted.mb-3 Showing quality products at amazing prices
+
+      if products && products.length
+        .products-grid
+          each product in products
+            .product-card
+              .product-image
+                img(src=product.thumbnail || product.images[0], alt=product.name)
+                if product.discountPrice
+                  .discount-badge #{Math.round(((product.price - product.discountPrice)/product.price) * 100)}%
+                if product.isFeatured
+                  .featured-badge Featured
+
+              .product-info
+                h3
+                  a(href=`/products/${product.slug}`)= product.name
+
+                p.category= product.category ? product.category.name : ''
+                p.description= product.description
+
+                .rating
+                  .stars
+                    - var starCount = Math.round(product.rating || 0)
+                    - for (var i = 1; i <= 5; i++)
+                      if i <= starCount
+                        i.fas.fa-star.filled
+                      else
+                        i.fas.fa-star
+                  span.review-count (#{product.reviews || 0})
+

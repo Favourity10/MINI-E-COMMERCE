@@ -1,0 +1,148 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title= title + ' - ShopHub'
+    link(href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet')
+    link(rel='stylesheet' href='/css/styles.css')
+    link(href='https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;700&display=swap' rel='stylesheet')
+
+  body
+    // Header Navigation
+    header.header
+      nav.navbar
+        .container
+          .nav-brand
+            a.logo(href='/')
+              i.fas.fa-shopping-bag
+              | ShopHub
+          
+          .nav-menu
+            ul.nav-links
+              li
+                a(href='/')
+                  i.fas.fa-home
+                  span Home
+
+              li
+                a(href='/products')
+                  i.fas.fa-box
+                  span Products
+
+              li
+                a(href='/cart')
+                  i.fas.fa-shopping-cart
+                  span Cart
+
+              if user
+                li.dropdown
+                  a(href='#')
+                    i.fas.fa-user-circle
+                    span= user.name
+                  ul.dropdown-menu
+                    li
+                      a(href='/profile')
+                        i.fas.fa-user
+                        span My Profile
+                    li
+                      a(href='/orders')
+                        i.fas.fa-file-invoice
+                        span My Orders
+                    li
+                      a(href='/wishlist')
+                        i.fas.fa-heart
+                        span Wishlist
+                    if user.role === 'admin'
+                      li
+                        a(href='/admin')
+                          i.fas.fa-tachometer-alt
+                          span Admin Panel
+                    li
+                      hr
+                    li
+                      a(href='/logout')
+                        i.fas.fa-sign-out-alt
+                        span Logout
+              else
+                li
+                  a.btn.btn-sm(href='/login')
+                    i.fas.fa-sign-in-alt
+                    span Login
+
+                li
+                  a.btn.btn-sm.btn-primary(href='/register')
+                    i.fas.fa-user-plus
+                    span Register
+
+    // Flash Messages
+    if messages && messages.success
+      .alert.alert-success
+        i.fas.fa-check-circle
+        span= messages.success
+
+    if messages && messages.error
+      .alert.alert-error
+        i.fas.fa-exclamation-circle
+        span= messages.error
+
+    // Main Content
+    main.main-content
+      .container
+        block content
+
+    // Footer
+    footer.footer
+      .container
+        .footer-content
+          .footer-col
+            h3 About ShopHub
+            p
+              | Your trusted online shopping destination for quality products at unbeatable prices.
+              br
+              | We offer a wide range of products with fast shipping and excellent customer service.
+
+          .footer-col
+            h3 Quick Links
+            ul
+              li
+                a(href='/') Home
+              li
+                a(href='/products') Products
+              li
+                a(href='/about') About Us
+              li
+                a(href='/contact') Contact Us
+
+          .footer-col
+            h3 Customer Service
+            ul
+              li
+                a(href='/faq') FAQ
+              li
+                a(href='/shipping') Shipping Info
+              li
+                a(href='/returns') Returns Policy
+              li
+                a(href='/privacy') Privacy Policy
+
+          .footer-col
+            h3 Follow Us
+            .social-links
+              a(href='#' title='Facebook')
+                i.fab.fa-facebook-f
+              a(href='#' title='Twitter')
+                i.fab.fa-twitter
+              a(href='#' title='Instagram')
+                i.fab.fa-instagram
+              a(href='#' title='LinkedIn')
+                i.fab.fa-linkedin-in
+
+        .footer-bottom
+          p &copy; 2024 ShopHub. All rights reserved. | 
+            a(href='/privacy') Privacy Policy
+            |  | 
+            a(href='/terms') Terms & Conditions
+
+    script(src='/js/main.js')
+    block scripts
